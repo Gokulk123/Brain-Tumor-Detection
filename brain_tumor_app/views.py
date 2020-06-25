@@ -1,4 +1,5 @@
 from django.core.files.storage import FileSystemStorage
+from django.http import HttpResponse
 from django.shortcuts import render
 from .models import office_details
 from .models import client_details
@@ -6,6 +7,7 @@ from .models import agent_details
 from .models import add_insurance_details
 from .models import add_claim_details
 from .models import forward_claim_details
+from .models import response
 from django.contrib.sessions.models import Session
 # Create your views here.
 def index(request):
@@ -272,3 +274,78 @@ def forward_claim(request):
 def forwared_claim_details(request):
     claim = forward_claim_details.objects.all()
     return render(request, 'forwared_claim_details.html', {'claim':claim})
+
+def show_result(request):
+    if request.method == 'POST':
+       is_private = request.POST.get('file', False)
+       uid = request.POST.get('uid')
+       #print(is_private)
+       import numpy as np
+       import cv2
+       import matplotlib.pyplot as plt
+
+       img_path = "media/"+is_private
+       print(img_path)
+       image = cv2.imread(img_path)
+       #print("width:{} pixels ".format(image.shape[1]))
+       #print("height:{} pixels ".format(image.shape[0]))
+       #print("channels:{}".format(image.shape[2]))
+       dim = (500, 590)
+       image = cv2.resize(image, dim)
+       cv2.imshow("new", image)
+
+       gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY, 0.7)
+       cv2.imshow("gray", gray)
+
+       (T, thresh) = cv2.threshold(gray, 155, 255, cv2.THRESH_BINARY)
+       cv2.imshow("thresh", thresh)
+
+       (T, threshInv) = cv2.threshold(gray, 155, 255, cv2.THRESH_BINARY_INV)
+       cv2.imshow("threshInv", threshInv)
+
+       kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 5))
+       closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+       cv2.imshow("Morphology", closed)
+
+       closed = cv2.erode(closed, None, iterations=14)
+       cv2.imshow("MorphologyErrotion", closed)
+       closed = cv2.dilate(closed, None, iterations=13)
+       cv2.imshow("MorphologyDilation", closed)
+
+       def auto_canny(image):
+           lower = 100
+           upper = 200
+           edged = cv2.Canny(image, lower, upper)
+           # return the edged image
+           return edged
+
+       canny = auto_canny(closed)
+       cv2.imshow("Canny", canny)
+
+       # lap = cv2.Laplacian(img,cv2.CV_64F)
+       # cv2.imshow('Edge',lap)
+
+       (cnts, _) = cv2.findContours(canny.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+       cv2.drawContours(image, cnts, -1, (0, 0, 255), 2)
+       cv2.imshow("Tumour or Not", image)
+       cv2.waitKey()
+       claim = forward_claim_details.objects.all()
+       return render(request, 'forwared_claim_details.html', {'claim': claim})
+       #return render(request, 'result.html', {'image': image})
+       #return HttpResponse(cv2.imshow("Tumour or Not", image))
+
+
+def save_response(request):
+    db = response(uid=request.POST.get('uid'),
+                               aid=request.POST.get('aid'),
+                               date=request.POST.get('date'), result=request.POST.get('result'))
+
+    db.save()
+    return render(request, 'send_response.html', {'msg': "Successfully Inserted"})
+
+def view_claim_result(request):
+    cname = request.session['cname']
+    cm = client_details.objects.get(username=cname)
+
+    reply = response.objects.filter(uid=cm.id)
+    return render(request, 'view_claim_result.html', {'reply': reply})

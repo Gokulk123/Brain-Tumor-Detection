@@ -60,6 +60,9 @@ urlpatterns = [
     path('user_claim_details/', views.user_claim_details),
     path('forward_claim/', views.forward_claim),
     path('forwared_claim_details/', views.forwared_claim_details),
+    path('show_result/', views.show_result),
+    path('save_response/', views.save_response),
+    path('view_claim_result/', views.view_claim_result),
 
 
 ]

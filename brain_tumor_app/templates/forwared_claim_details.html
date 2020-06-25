@@ -118,8 +118,9 @@
            <td>{{values.uid}}</td>
 		  <td>{{values.Inid}}</td>
 		  <td>{{values.image}}</td>
-           <td><form action="#" method="post">{% csrf_token %}
+           <td><form action="/show_result/" method="post" enctype="multipart/form-data">{% csrf_token %}
 			  <input type="text" name="uid" value="{{values.id}}" hidden>
+			  <input type="text" name="file" value="{{values.image}}" hidden>
 			  <input type="submit" value="Analyse">
 		  </form></td>
 

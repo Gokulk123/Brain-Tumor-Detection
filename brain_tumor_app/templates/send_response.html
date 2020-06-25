@@ -91,7 +91,7 @@
 				   	<li style="background-image: url('/static/images/off.jpg');">
 				   		<div class="overlay"></div>
 				   		<div class="container-fluid"><br><br>
-			                  <form action="#" method="post">{% csrf_token %}
+			                  <form action="/save_response/" method="post">{% csrf_token %}
 								<h2>SEND RESPONSE</h2><br>
 								<h3><font color="green">{{msg}}</font> </h3>
 				   			<div class="row js-fullheight slider-text" style="padding-top:100px;padding-left:350px;" >
@@ -124,7 +124,7 @@
                                         <td>
                                             <div class="col-md-12">
 					   					        <label>Result</label>
-												<textarea name="lnum" class="form-control" required style="color:black;width:400px;"></textarea>
+												<textarea name="result" class="form-control" required style="color:black;width:400px;"></textarea>
 					   			            </div>
                                         </td>
                                     </tr>

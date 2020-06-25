@@ -77,3 +77,11 @@ class forward_claim_details(models.Model):
     aid = models.CharField(max_length=100)
     image = models.FileField(default='SOME STRING')
 
+
+class response(models.Model):
+    uid = models.CharField(max_length=100)
+    aid = models.CharField(max_length=100)
+    date = models.DateField()
+    result = models.CharField(max_length=100)
+
+
